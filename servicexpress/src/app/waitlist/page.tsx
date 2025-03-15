@@ -17,17 +17,17 @@ const WaitlistForm = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/waitlist/register`, {
-        email,
-        inApprole: inAppRole,
-      });
-      setMessage(response.data.message);
-    } catch (err) {
-      setError(err.response?.data?.message || "Something went wrong. Try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/waitlist/register`, {
+          email,
+          inApprole: inAppRole,
+        });
+        setMessage(response.data.message);
+      } catch (err) {
+        const error = err as AxiosError; // Cast err as AxiosError
+        setError(error.response?.data?.message || "Something went wrong. Try again.");
+      } finally {
+        setLoading(false);
+      }}
 
 
   return (
