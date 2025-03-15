@@ -1,6 +1,6 @@
 "use client"
 import { useState } from "react";
-import axios from "axios";
+import axios,{AxiosError} from "axios";
 import "./page.css"; // External CSS file for styling
 
 const WaitlistForm = () => {
