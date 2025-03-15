@@ -1,12 +1,14 @@
 "use client";
 
-import { useRouter } from "next/navigation"; // Corrected import
+import { useRouter, useSearchParams } from "next/navigation"; // Corrected import
 import { useState, useEffect } from "react";
 import axios from "axios";
 
 export default function OTPVerification() {
   const router = useRouter();
-  const email = router.query?.email as string; // Ensure email is a string
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email"); // Get email from URL params
+
   const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
   const [isValid, setIsValid] = useState<boolean | null>(null); // Handle validity state
 
@@ -51,10 +53,7 @@ export default function OTPVerification() {
 
       setIsValid(true);
       setTimeout(() => {
-        router.push({
-          pathname: "/resetPassword",
-          query: { email, otp: enteredOtp },
-        });
+        router.push(`/resetPassword?email=${email}&otp=${enteredOtp}`);
       }, 1000);
     } catch (error) {
       setIsValid(false);
