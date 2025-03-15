@@ -1,17 +1,27 @@
 "use client";
-import { useState } from "react";
+
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import "../forgotPassword/page.css"
+import "../forgotPassword/page.css";
+
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
+  const isMounted = useRef(true);
+
+  // Ensure no state updates after unmount
+  useState(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   const handleSubmit = async () => {
-    if (!email) {
+    if (!email.trim()) {
       setError("Please enter your email.");
       return;
     }
@@ -24,18 +34,26 @@ const ForgotPassword = () => {
       const response = await axios.post("https://your-backend.com/api/forgot-password", { email });
 
       if (response.data.success) {
-        setMessage("OTP sent to your email!");
+        if (isMounted.current) {
+          setMessage("OTP sent to your email!");
+        }
         setTimeout(() => {
-          router.push(`/verify-otp?email=${email}`);
+          router.push(`/code?email=${encodeURIComponent(email)}`);
         }, 2000);
       } else {
-        setError(response.data.message || "Failed to send OTP.");
+        if (isMounted.current) {
+          setError(response.data.message || "Failed to send OTP.");
+        }
       }
     } catch (err) {
-      setError("Something went wrong. Please try again.");
+      if (isMounted.current) {
+        setError("Something went wrong. Please try again.");
+      }
     }
 
-    setLoading(false);
+    if (isMounted.current) {
+      setLoading(false);
+    }
   };
 
   return (
