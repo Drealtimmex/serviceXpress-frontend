@@ -1,14 +1,14 @@
 "use client";
 
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation"; // Corrected import
 import { useState, useEffect } from "react";
 import axios from "axios";
 
 export default function OTPVerification() {
   const router = useRouter();
-  const { email } = router.query; // Get email from query params
-  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const [isValid, setIsValid] = useState(null); // null = no status, true = valid, false = invalid
+  const email = router.query?.email as string; // Ensure email is a string
+  const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
+  const [isValid, setIsValid] = useState<boolean | null>(null); // Handle validity state
 
   useEffect(() => {
     if (!email) {
@@ -16,24 +16,28 @@ export default function OTPVerification() {
     }
   }, [email, router]);
 
-  const handleChange = (index, value) => {
+  // Handle OTP input change
+  const handleChange = (index: number, value: string) => {
     if (!/^[0-9]?$/.test(value)) return; // Allow only numbers
 
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
 
+    // Move to the next input field if a digit is entered
     if (value !== "" && index < 5) {
-      document.getElementById(`otp-${index + 1}`).focus(); // Move to next box
+      document.getElementById(`otp-${index + 1}`)?.focus();
     }
   };
 
-  const handleBackspace = (index, e) => {
+  // Handle backspace key event
+  const handleBackspace = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Backspace" && !otp[index] && index > 0) {
-      document.getElementById(`otp-${index - 1}`).focus(); // Move back
+      document.getElementById(`otp-${index - 1}`)?.focus();
     }
   };
 
+  // Verify OTP function
   const verifyOTP = async () => {
     const enteredOtp = otp.join("");
     if (enteredOtp.length !== 6) return;
@@ -68,7 +72,7 @@ export default function OTPVerification() {
             key={index}
             id={`otp-${index}`}
             type="text"
-            maxLength="1"
+            maxLength={1} // Fixed maxLength
             pattern="[0-9]*"
             inputMode="numeric"
             value={digit}
