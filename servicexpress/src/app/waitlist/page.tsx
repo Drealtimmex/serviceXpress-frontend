@@ -23,7 +23,7 @@ const WaitlistForm = () => {
         });
         setMessage(response.data.message);
       } catch (err) {
-        const error = err as AxiosError; // Cast err as AxiosError
+        const error = err as AxiosError<{ message?: string }>; 
         setError(error.response?.data?.message || "Something went wrong. Try again.");
       } finally {
         setLoading(false);
