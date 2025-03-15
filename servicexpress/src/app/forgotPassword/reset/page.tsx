@@ -17,7 +17,7 @@ const ResetPassword = () => {
 
   useEffect(() => {
     if (!email || !otp) {
-      router.push("/forgot-password");
+      router.push("/forgotPassword");
     }
   }, [email, otp, router]);
 
