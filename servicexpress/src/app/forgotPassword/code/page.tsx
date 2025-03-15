@@ -1,48 +1,55 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation"; // Corrected import
-import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 
 export default function OTPVerification() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const email = searchParams.get("email"); // Get email from URL params
+  const email = searchParams.get("email");
 
-  const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
-  const [isValid, setIsValid] = useState<boolean | null>(null); // Handle validity state
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [isValid, setIsValid] = useState<boolean | null>(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
     if (!email) {
-      router.push("/forgotPassword"); // Redirect if email is missing
+      router.push("/forgotPassword");
     }
   }, [email, router]);
 
-  // Handle OTP input change
   const handleChange = (index: number, value: string) => {
-    if (!/^[0-9]?$/.test(value)) return; // Allow only numbers
+    if (!/^\d?$/.test(value)) return;
 
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
 
-    // Move to the next input field if a digit is entered
     if (value !== "" && index < 5) {
-      document.getElementById(`otp-${index + 1}`)?.focus();
+      inputRefs.current[index + 1]?.focus();
     }
   };
 
-  // Handle backspace key event
   const handleBackspace = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Backspace" && !otp[index] && index > 0) {
-      document.getElementById(`otp-${index - 1}`)?.focus();
+      inputRefs.current[index - 1]?.focus();
     }
   };
 
-  // Verify OTP function
   const verifyOTP = async () => {
     const enteredOtp = otp.join("");
-    if (enteredOtp.length !== 6) return;
+    if (enteredOtp.length !== 6) {
+      setError("Please enter the full 6-digit OTP.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    setIsValid(null);
 
     try {
       const { data } = await axios.post(
@@ -51,13 +58,21 @@ export default function OTPVerification() {
         { headers: { "Content-Type": "application/json" } }
       );
 
-      setIsValid(true);
-      setTimeout(() => {
-        router.push(`/resetPassword?email=${email}&otp=${enteredOtp}`);
-      }, 1000);
+      if (data.success) {
+        setIsValid(true);
+        setTimeout(() => {
+          router.push(`/resetPassword?email=${email}&otp=${enteredOtp}`);
+        }, 1000);
+      } else {
+        setIsValid(false);
+        setError(data.message || "Invalid OTP. Try again.");
+      }
     } catch (error) {
       setIsValid(false);
+      setError("An error occurred. Please try again.");
     }
+
+    setLoading(false);
   };
 
   return (
@@ -69,9 +84,9 @@ export default function OTPVerification() {
         {otp.map((digit, index) => (
           <input
             key={index}
-            id={`otp-${index}`}
+            ref={(el) => (inputRefs.current[index] = el)}
             type="text"
-            maxLength={1} // Fixed maxLength
+            maxLength={1}
             pattern="[0-9]*"
             inputMode="numeric"
             value={digit}
@@ -82,13 +97,17 @@ export default function OTPVerification() {
         ))}
       </div>
 
-      <button className="auth-button" onClick={verifyOTP} disabled={otp.join("").length !== 6}>
-        Verify
+      {error && <p className="error-text">{error}</p>}
+
+      <button className="auth-button" onClick={verifyOTP} disabled={loading || otp.join("").length !== 6}>
+        {loading ? "Verifying..." : "Verify"}
       </button>
 
       {isValid === false && <p className="error-text">Invalid OTP. Try again.</p>}
 
-      <p className="resend-text">Didn't receive the email? <a href="#">Resend</a></p>
+      <p className="resend-text">
+        Didn't receive the email? <a href="#">Resend</a>
+      </p>
       <a href="#" className="back-link">← Back to log in</a>
     </div>
   );
