@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import "../forgotPassword/page.css";
@@ -13,8 +13,8 @@ const ForgotPassword = () => {
   const router = useRouter();
   const isMounted = useRef(true);
 
-  // Ensure no state updates after unmount
-  useState(() => {
+  useEffect(() => {
+    isMounted.current = true;
     return () => {
       isMounted.current = false;
     };
