@@ -1,9 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  experimental: {
-    appDir: true, // Ensures Next.js handles the App Router correctly
-  },
+  reactStrictMode: true,
+  swcMinify: true,
 };
 
 export default nextConfig;
