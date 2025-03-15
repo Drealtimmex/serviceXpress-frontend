@@ -81,9 +81,11 @@ export default function OTPVerification() {
 
       <div className="otp-inputs">
         {otp.map((digit, index) => (
-          <input
-            key={index}
-            ref={(el) => (inputRefs.current[index] = el)}
+      <input
+      key={index}
+      ref={(el) => {
+        inputRefs.current[index] = el;
+      }}
             type="text"
             maxLength={1}
             pattern="[0-9]*"
