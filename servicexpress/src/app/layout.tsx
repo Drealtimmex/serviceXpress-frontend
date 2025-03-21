@@ -1,5 +1,5 @@
 import "./globals.css";
-import type { Metadata } from "next";
+ import type { Metadata } from "next";
 import { Inter,Poppins } from "next/font/google";
 import RedirectToWaitlist from "./redirectWaitlist"; // Import the redirection component
 
